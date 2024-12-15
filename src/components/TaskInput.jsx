@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
-function TaskInput({ addTask }){
+function TaskInput({onaddTask}){
   const [title, setTitle] = useState('');
   const [about, setAbout] = useState('');
 
-  const handleAddTask = () => {
+  function handleAddTask(){
     if (title && about) {
-        addTask(title, about);
+        onaddTask(title, about);
         setTitle('');
         setAbout('');
     } else {
@@ -17,10 +17,10 @@ function TaskInput({ addTask }){
   return (
     <div className="task-input-container">
         <div className="input-container">
-            <input placeholder="Title..." value={title} onChange={(e) => setTitle(e.target.value)}/>
-            <input placeholder="About..." value={about} onChange={(e) => setAbout(e.target.value)}/>
+            <input className="title-input" placeholder="Title..." value={title} onChange={(e) => setTitle(e.target.value)}/>
+            <input className="about-input" placeholder="About..." value={about} onChange={(e) => setAbout(e.target.value)}/>
         </div>
-        <button onClick={handleAddTask}>+</button>
+        <button className="add-button" onClick={handleAddTask}>+</button>
     </div>
   );
 };

@@ -1,6 +1,5 @@
-
 import { useState } from 'react'
-import ToDo from './components/ToDo'
+import MainPage from './components/MainPage'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -8,7 +7,7 @@ function App() {
   return (
     <>
       <div className="App">
-        <ToDo/>
+        <MainPage/>
       </div> 
     </>
   )
