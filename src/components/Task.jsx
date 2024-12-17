@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Share from './Share';
 import Edit from './Edit';
 import { saveTask } from './storage';
-import { Draggable } from 'react-beautiful-dnd';
 
-function Task({ task, index, deleteTasks, editTask }) {
+function Task({ task, index, deleteTasks, editTask, handleDragStart}) {
     const [isEditMenuVisible, setEditMenuVisible] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
     const [editedTitle, setEditedTitle] = useState(task?.title || ''); 
@@ -44,44 +43,29 @@ function Task({ task, index, deleteTasks, editTask }) {
     }
 
     return (
-        <Draggable draggableId={index.toString()} index={index}>
-            {(provided) => (
-                <div className="task-element" onClick={toggleEditMenu} ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                    <div className="task-container">
-                        <div className="task-container-text">
-                            <h3>{task?.title || 'Untitled Task'}</h3>
-                            <p>{task?.about || 'No details provided.'}</p>
-                        </div>
-                        <button className="delete-button" onClick={handleDeleteClick}>x</button>
+        <div className="task-element" onClick={toggleEditMenu} draggable onDragStart={(e) => handleDragStart(e, index)} data-index={index}>
+            <div className="task-container">
+                <div className="task-container-text">
+                    <h3>{task?.title || 'Untitled Task'}</h3>
+                    <p>{task?.about || 'No details provided.'}</p>
+                </div>
+                <button className="delete-button" onClick={handleDeleteClick}>x</button>
+            </div>
+
+            {isEditMenuVisible && (
+                <div className="edit-menu" style={{ display: 'flex' }}>
+                    <div className="block-buttons">
+                        <button className="button-share" onClick={Share}><img src="./src/icons/Share.svg" alt="Share" /></button>
+                        <button className="button-i">i</button>
+                        <button className="button-edit" onClick={handleEditClick}><img src="./src/icons/edit.svg" alt="Edit" /></button>
                     </div>
-
-                    {isEditMenuVisible && (
-                        <div className="edit-menu" style={{ display: 'flex' }}>
-                            <div className="block-buttons">
-                                <button className="button-share" onClick={Share}>
-                                    <img src="./src/icons/Share.svg" alt="Share" />
-                                </button>
-                                <button className="button-i">i</button>
-                                <button className="button-edit" onClick={handleEditClick}>
-                                    <img src="./src/icons/edit.svg" alt="Edit" />
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {showEdit && (
-                        <Edit 
-                            title={editedTitle}
-                            about={editedAbout}
-                            setTitle={setEditedTitle}
-                            setAbout={setEditedAbout}
-                            save={save}
-                            cancel={cancel}
-                        />
-                    )}
                 </div>
             )}
-        </Draggable>
+
+            {showEdit && (
+                <Edit title={editedTitle} about={editedAbout} setTitle={setEditedTitle} setAbout={setEditedAbout} save={save} cancel={cancel}/>
+            )}
+        </div>
     );
 }
 export default Task;

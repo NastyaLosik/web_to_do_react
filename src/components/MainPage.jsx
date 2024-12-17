@@ -3,7 +3,6 @@ import TaskInput from './TaskInput';
 import Task from './Task';
 import DeleteTask from './deleteTask'; 
 import { getTasks, saveTasks } from './storage';
-import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
 function MainPage() {
     const [tasks, setTasks] = useState(getTasks() || []); 
@@ -42,40 +41,41 @@ function MainPage() {
         setDeleteIndex(null);
     }
 
-    function onDragEnd(result) {
-        if (!result.destination) return;
-
-        const updatedTasks = Array.from(tasks);
-        const [removed] = updatedTasks.splice(result.source.index, 1);
-        updatedTasks.splice(result.destination.index, 0, removed);
-
-        setTasks(updatedTasks);
-        saveTasks(updatedTasks);
+    function handleDragStart(e, index) {
+        e.dataTransfer.setData("text/plain", index);
+        e.dataTransfer.effectAllowed = "move";
     }
 
+    function handleDrop(e) {
+        e.preventDefault();
+        const draggedIndex = e.dataTransfer.getData("text/plain");
+        const dropIndex = e.target.closest('.task-element')?.dataset.index;
+        if (dropIndex !== undefined && draggedIndex !== dropIndex) {
+            const updatedTasks = [...tasks];
+            const fromIndex = parseInt(draggedIndex, 10);
+            const toIndex = parseInt(dropIndex, 10);
+            if (fromIndex !== toIndex) {
+                const [removed] = updatedTasks.splice(fromIndex, 1);
+                updatedTasks.splice(toIndex, 0, removed);
+                setTasks(updatedTasks);
+                saveTasks(updatedTasks);
+            }
+        }
+    }
+
+    function allowDrop(e) {
+        e.preventDefault();  
+    }
 
     return (
         <div className="page">
             <TaskInput onaddTask={handleAddTask} />
             {tasks.length > 0 ? (
-                <DragDropContext onDragEnd={onDragEnd}>
-                    <Droppable droppableId="taskList">
-                        {(provided) => (
-                            <div className="task-list" {...provided.droppableProps} ref={provided.innerRef}>
-                                {tasks.map((task, index) => (
-                                    <Task 
-                                        key={index} 
-                                        index={index} 
-                                        task={task} 
-                                        deleteTasks={confirmDeleteTask} 
-                                        editTask={handleEditTask} 
-                                    />
-                                ))}
-                                
-                            </div>
-                        )}
-                    </Droppable>
-                </DragDropContext>
+                <div className="task-list" onDragOver={allowDrop} onDrop={handleDrop}>
+                    {tasks.map((task, index) => (
+                        <Task index={index} task={task} deleteTasks={confirmDeleteTask} editTask={handleEditTask} handleDragStart={handleDragStart}/>
+                    ))}
+                </div>
             ) : (
                 <div className="main-container">
                     <div className="text-main-container">
@@ -83,7 +83,6 @@ function MainPage() {
                     </div>
                 </div>
             )}
-
             {showDelete && (
                 <DeleteTask 
                     onConfirm={handleDeleteConfirmed}
